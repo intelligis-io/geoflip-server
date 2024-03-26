@@ -4,6 +4,7 @@ from flask_smorest import Api
 from dotenv import load_dotenv 
 
 from db import db
+import models
 
 def create_app():
     app = Flask(__name__)
@@ -19,7 +20,7 @@ def create_app():
     db_url = f"postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}?sslmode={db_ssl_mode}"
 
     app.config["PROPAGATE_EXCEPTIONS"] = True
-    app.config["API_TITLE"] = "Stores REST API"
+    app.config["API_TITLE"] = "GeoFlip REST API"
     app.config["API_VERSION"] = "v1"
     app.config["OPENAPI_VERSION"] = "3.1.0"
     app.config["OPENAPI_URL_PREFIX"] = "/"
