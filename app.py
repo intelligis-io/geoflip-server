@@ -1,10 +1,14 @@
 import os
 from flask import Flask
 from flask_smorest import Api
+from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv 
 
 from db import db
 import models
+from blocklist import BLOCKLIST
+
+from resources.accounts import UserBlueprint
 
 def create_app():
     app = Flask(__name__)
@@ -32,12 +36,30 @@ def create_app():
 
     api = Api(app)
 
+    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
+    jwt = JWTManager(app)
+    # these all run when the jwt token is being verified
+    @jwt.token_in_blocklist_loader
+    def check_if_token_in_blocklist(jwt_header, jwt_payload):
+        return jwt_payload["jti"] in BLOCKLIST
+    @jwt.revoked_token_loader
+    def revoked_token_callback(jwt_header, jwt_payload):
+        return {"message":"The token has been revoked."}, 401
+    @jwt.expired_token_loader
+    def expired_token_callback(jwt_header, jwt_payload):
+        return {"message":"The token has expired."}, 401
+    @jwt.invalid_token_loader
+    def invalid_token_callback(error):
+        return {"message":"Signature verification failed."}, 401
+    @jwt.unauthorized_loader
+    def missing_token_callback(error):
+        return {"message":"Request does not contain an access token."}, 401
+
     # creates all the tables before the first request
     with app.app_context():
         db.create_all()
 
-    @app.get("/")
-    def get_hello():
-        return {"hello": "world"}, 200
+    # register all the blueprints
+    api.register_blueprint(UserBlueprint)
 
     return app

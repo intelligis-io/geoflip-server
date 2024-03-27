@@ -1,27 +1,27 @@
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-from marshmallow_sqlalchemy.fields import Nested
-from models import UserModel, TokenModel, UsageModel
+from marshmallow import Schema, fields, validate
 
-class UserSchema(SQLAlchemyAutoSchema):
-    class Meta:
-        model = UserModel
-        load_instance = True
-        include_relationships = True
-        exclude = ("password",)
+class UsageSchema(Schema):
+    usage_id = fields.Int(dump_only=True)
+    token_id = fields.Int(required=True, load_only=True)
+    endpoint = fields.Str(required=True)
+    timestamp = fields.DateTime(required=True)
+    request_size = fields.Int(required=True)
+    response_size = fields.Int(required=True)
 
-    tokens = Nested("TokenSchema", many=True, exclude=("user",), dump_only=True)
+class LoginSchema(Schema):
+    email = fields.Email(required=True)
+    password = fields.Str(required=True, load_only=True)
 
-class TokenSchema(SQLAlchemyAutoSchema):
-    class Meta:
-        model = TokenModel
-        load_instance = True
-        include_relationships = True
-        exclude = ("token",)
+class TokenSchema(Schema):
+    token_id = fields.Int(dump_only=True)
+    user_id = fields.Int(required=True, load_only=True)
+    token = fields.Str(required=True, load_only=True)
+    expiration = fields.DateTime(required=True)
+    usages = fields.List(fields.Nested(UsageSchema), dump_only=True)
 
-    usages = Nested('UsageSchema', many=True, dump_only=True)
-
-class UsageSchema(SQLAlchemyAutoSchema):
-    class Meta:
-        model = UsageModel
-        load_instance = True
-        include_relationships = True
+class UserSchema(Schema):
+    user_id = fields.Int(dump_only=True)
+    email = fields.Email(required=True)
+    username = fields.Str(required=True, validate=validate.Length(min=3))
+    password = fields.Str(required=True, load_only=True, validate=validate.Length(min=8))
+    tokens = fields.List(fields.Nested(TokenSchema), dump_only=True)
