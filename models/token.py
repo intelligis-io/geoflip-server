@@ -5,6 +5,7 @@ class TokenModel(db.Model):
 
     token_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    name = db.Column(db.String(256), nullable=False)
     token = db.Column(db.String(256), nullable=False)
     expiration = db.Column(db.DateTime, nullable=False)
 

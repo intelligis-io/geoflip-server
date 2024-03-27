@@ -9,3 +9,4 @@ class UserModel(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
 
     tokens = db.relationship('TokenModel', backref='user', lazy='dynamic')
+    transactions = db.relationship('TransactionModel', backref='user', lazy='dynamic')

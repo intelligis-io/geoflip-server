@@ -57,6 +57,7 @@ def create_app():
 
     # creates all the tables before the first request
     with app.app_context():
+        db.drop_all()
         db.create_all()
 
     # register all the blueprints
