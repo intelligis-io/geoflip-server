@@ -47,6 +47,7 @@ class User(MethodView):
 
     @jwt_required()
     def delete(self, user_id):
+        # TODO: check if the user to be deleted is the same as the one in the token
         user = UserModel.query.get_or_404(user_id)
 
         try:
